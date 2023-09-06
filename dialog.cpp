@@ -47,7 +47,7 @@ Dialog::Dialog(QWidget *parent)
         qDebug() << "Found esp32 port... \n";
         esp32 -> setPortName(esp32_port_name);
         esp32 -> open(QSerialPort::ReadWrite);
-        esp32 -> setBaudRate(QSerialPort::Baud115200);
+        esp32 -> setBaudRate(BAUD);
 
         esp32 -> setDataBits(QSerialPort::Data8);
         esp32 -> setFlowControl(QSerialPort::NoFlowControl);

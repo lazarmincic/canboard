@@ -1,6 +1,8 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#define BAUD 250000
+
 #include <qdebug.h>
 #include <qstring.h>
 #include <qmessagebox.h>

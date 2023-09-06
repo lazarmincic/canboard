@@ -2,6 +2,7 @@
 #define SERIALREADWORKER_H
 
 #include <QObject>
+#include <QDebug>
 
 class SerialReadWorker : public QObject
 {
