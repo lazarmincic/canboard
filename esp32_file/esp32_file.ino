@@ -13,38 +13,55 @@ const int tresh = 80; //eksperimentalno
 
 #define BAUD 250000
 
-const int leds [3] = {26,25,23};
+const int leds [6] = {26,25,23,22,21,19};
 
-unsigned long when_delay_started [3]= {0,0,0};
-int delay_ms [3] = {0,0,0};
+unsigned long when_delay_started [6]= {0,0,0,0,0,0};
+int delay_ms [6] = {0,0,0,0,0,0};
 
 const unsigned long kec = 1;
 
 String led_s;
 
-void ledcAnalogWrite(uint8_t channel, uint32_t value, uint32_t valueMax = 100) 
+void ledcAnalogWrite(uint8_t channel, uint32_t value) 
 {
+  bool is_rgb = false;
+  uint32_t valueMax = 100;
+  if (channel<=5 && channel>=3) 
+  {
+     is_rgb = true;
+     valueMax = 255; 
+  }
   uint32_t duty = ((pow(2,LEDC_TIMER_12_BIT)-1) / valueMax) * min(value, valueMax); //  4095 od 2 ^ 12 - 1
-  ledcWrite(channel, duty);
+  if (!is_rgb)
+    ledcWrite(channel, duty);
+  else
+    ledcWrite(channel, ((pow(2,LEDC_TIMER_12_BIT)-1)-duty)); // obrnuta logika
 }
+
+TaskHandle_t serialwrite;
+TaskHandle_t serialread;
 
 void setup()
 {
   Serial.begin(BAUD,SERIAL_8O2); // 8 bit, odd parity, 2 stop bita
+  delay(2000);
   touchSetCycles(0x3500 ,0x3500); 
-  for (int i=0;i<3;i++)
+  for (int i=0;i<6;i++) // 0-5
   {
       ledcSetup(i, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
       ledcAttachPin(leds[i], i); 
   }
 
+  xTaskCreatePinnedToCore(
+  serialwrite_f,"serialwrite",10000,NULL,1,&serialwrite,0);
+  xTaskCreatePinnedToCore(
+  serialread_f, "serialread",10000,NULL,1,&serialread,1);
+
 }
 
-// treba jos dodati i led diode da mogu da se upisuju
-
-void loop()
-{
-  // pisanje
+void serialwrite_f(void * pvParameters ) {
+  for(;;) {
+      // pisanje
 
   String ispis;
   
@@ -72,7 +89,13 @@ void loop()
 
   // funkcija koja cita serijski port u qt treba da bude jednostavna
 
-  // citanje
+  }
+}
+
+void serialread_f( void * pvParameters ){
+  for(;;)
+  {
+      // citanje
 
   // format: led , vreme , jacina  
   // vreme u ms, jacina 0-100, led 0-2
@@ -99,8 +122,8 @@ void loop()
     int pwm_val = jacina_s.toInt();
 
        if (led_s == "0")
-          for (int i=0;i<3;i++)
-            ledcAnalogWrite(i,0);
+            for (int i=0;i<6;i++)
+              ledcAnalogWrite(i,0);
        else
        {
         ledcAnalogWrite((led_s.toInt()-1),pwm_val);
@@ -108,11 +131,16 @@ void loop()
        }
   }
     if (led_s != "0")
-       for (int i=0;i<3;i++)
+       for (int i=0;i<6;i++)
          {
           if ((millis() - when_delay_started[i]) >= (delay_ms[i]*kec))
              ledcAnalogWrite (i, 0); 
          }
   
-  
+  }
+}
+
+
+void loop()
+{
 }
