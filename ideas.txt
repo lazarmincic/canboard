@@ -109,33 +109,38 @@ umesto spin box-a slajder - ipak ne
 
 odvoj write rgb od changecancolor - done
 
+mogu se birati samo jarke boje - daj do znanja korisniku
+
+popravi kad rgb svetli
+
+da dioda moze da sija sve dok je pritisnto
+
+dodaj kasnije on off za sve led i za sve ulaze
+
+kada kliknem na limenku svetli i svira
+
+dodaj dugme da li da sija dok se menjaju pod. led
+
+u funciju strpaj i za biranje boje (ono sto sam kopirao pre)
+
+menjanje boje slike diode u funciju
+
+prekopiraj funcionalnosti sa prve led na sve, i za konzerve isto - funkc!
+
+device currently in use napravi da se zatvara kada je upis uspesan (kao pre)
+
+rgb led slika se boji kada i dioda (na pritisak konzerve)
+
+dugme za vracanje konzervi u defoltni polozaj - boje duge
+
+menjanje difoltnih boja (kad nisu upaljene) ovako kako sam sada, uz dalje opcije npr crna, crvena, transparenta, bela
 
 /////////QDoc za dokumentaciju - na kraju
 ////////dugmad i pozadina da budu druge boje - na kraju
 /////dodaj zvukove i boje svemu - na kraju
 
 
-**** u funciju strpaj i za biranje boje (ono sto sam kopirao pre)
-
-**** prekopiraj funcionalnosti sa prve led na sve, i za konzerve isto - funkc!
-
---- dugme za vracanje konzervi u defoltni polozaj - boje duge
-
-*** menjanje boje slike diode u funciju
-
----dodaj dugme da li da sija dok se menjaju pod. led
 
 
-*** menjanje difoltnih boja (kad nisu upaljene) ovako kako sam sada, uz dalje opcije npr crna, crvena, transparenta, bela
 
-*** popravi kad rgb svetli
 
-***mogu se birati samo jarke boje - daj do znanja korisniku
-
-*** da dioda moze da sija sve dok je pritisnto
-
-***dodaj kasnije on off za sve led i za sve ulaze
-
-** kada kliknem na limenku svetli i svira
-
-on_comboBox_change_note_1

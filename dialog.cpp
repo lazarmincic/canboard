@@ -18,43 +18,79 @@ Dialog::Dialog(QWidget *parent)
     check_if_connected->start(CHECKING_RATE);
 
     connect(this, &Dialog::value_changed_signal, this, &Dialog::value_changed);
-    connect(ui->pushButton,&QPushButton::clicked, this, &Dialog::pushButton_clicked);
+    connect(ui->pushButton,&QPushButton::clicked, this, &Dialog::pushButton_clicked); // test dugme
 
 
   // test
 
    // write_diode(plava,9000,100);
 
-    connect(ui->can0_chooseColor,&QPushButton::clicked, this, &Dialog::pushButton_2_clicked);
+    connect(ui->can0_chooseColor,&QPushButton::clicked, this, &Dialog::show_can0_colordialog);
+    connect(ui->can1_chooseColor,&QPushButton::clicked,this,&Dialog::show_can1_colordialog);
+    connect(ui->can2_chooseColor,&QPushButton::clicked,this,&Dialog::show_can2_colordialog);
+    connect(ui->can3_chooseColor,&QPushButton::clicked,this,&Dialog::show_can3_colordialog);
+    connect(ui->can4_chooseColor,&QPushButton::clicked,this,&Dialog::show_can4_colordialog);
+    connect(ui->can5_chooseColor,&QPushButton::clicked,this,&Dialog::show_can5_colordialog);
+    connect(ui->can6_chooseColor,&QPushButton::clicked,this,&Dialog::show_can6_colordialog);
 
+ /*
     changecolor_C0(to_darker_color(C0_color,3));
+    changecolor_C1(to_darker_color(C1_color,3));
+    changecolor_C2(to_darker_color(C2_color,3));
+    changecolor_C3(to_darker_color(C3_color,3));
+    changecolor_C4(to_darker_color(C4_color,3));
+    changecolor_C5(to_darker_color(C5_color,3));
+    changecolor_C6(to_darker_color(C5_color,3));
+*/
+    changeAllAtOnce(to_darker_color(Qt::red,3));
 
     can0_colordialog_declare();
+    can1_colordialog_declare();
+    can2_colordialog_declare();
+    can3_colordialog_declare();
+    can4_colordialog_declare();
+    can5_colordialog_declare();
+    can6_colordialog_declare();
 
-    ui->lineEdit_1->setMaxLength(MAX_DELAY_LENGTH); // max delay 9999ms
-    ui->lineEdit_1->setText(QString::number(default_delay)); // pod. vrednost
+    ui->lineEdit_delay->setMaxLength(MAX_DELAY_LENGTH); // max delay 9999ms
+    ui->lineEdit_delay->setText(QString::number(default_delay)); // pod. vrednost
 
-    connect(ui->lineEdit_1,&QLineEdit::textEdited,this,&Dialog::delay_updated);
+    connect(ui->lineEdit_delay,&QLineEdit::textEdited,this,&Dialog::delay_updated);
 
     ui->label_green->setPixmap(changeImageColor(REDDIODE_IMG,Qt::green));
     ui->label_blue->setPixmap(changeImageColor(REDDIODE_IMG,Qt::blue));
     ui->label_rgb->setPixmap(changeImageColor(REDDIODE_IMG,default_rgb));
 
-    connect(ui->pushButton_red,&QPushButton::clicked,this,&Dialog::red_butt_clicked);
+    connect(ui->pushButton_red,&QPushButton::clicked,this,&Dialog::red_onoff);
+    connect(ui->pushButton_green,&QPushButton::clicked,this,&Dialog::green_onoff);
+    connect(ui->pushButton_blue,&QPushButton::clicked,this,&Dialog::blue_onoff);
+    connect(ui->pushButton_rgb,&QPushButton::clicked,this,&Dialog::rgb_onoff);
 
    // ui->pushButton_red_over->setStyleSheet("background-color: rgb(255,0,0);");
     ui->pushButton_red_over->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
+    ui->pushButton_green_over->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
+    ui->pushButton_blue_over->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
+    ui->pushButton_rgb_over->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
     connect(ui->pushButton_red_over,&QPushButton::clicked,this,&Dialog::redled_pic_clicked);
-    connect(ui->spinBox_red,QOverload<int>::of(&QSpinBox::valueChanged),this,&Dialog::red_jacina_change);
+    connect(ui->pushButton_green_over,&QPushButton::clicked,this,&Dialog::greenled_pic_clicked);
+    connect(ui->pushButton_blue_over,&QPushButton::clicked,this,&Dialog::blueled_pic_clicked);
+    connect(ui->pushButton_rgb_over,&QPushButton::clicked,this,&Dialog::rgbled_pic_clicked);
 
-    connect(ui->pushButton_3,&QPushButton::clicked,this,&Dialog::popup_change_color_rgb);
+    connect(ui->spinBox_red,QOverload<int>::of(&QSpinBox::valueChanged),this,&Dialog::red_jacina_change);
+    connect(ui->spinBox_green,QOverload<int>::of(&QSpinBox::valueChanged),this,&Dialog::green_jacina_change);
+    connect(ui->spinBox_blue,QOverload<int>::of(&QSpinBox::valueChanged),this,&Dialog::blue_jacina_change);
+    connect(ui->spinBox_rgb,QOverload<int>::of(&QSpinBox::valueChanged),this,&Dialog::rgb_jacina_change);
+
+
+    connect(ui->izaberiBoju_rgb,&QPushButton::clicked,this,&Dialog::popup_change_color_rgb);
 
     rgb_dialog = new QColorDialog(default_rgb,this);
     connect(rgb_dialog,&QColorDialog::currentColorChanged,this,&Dialog::changeRgbLabelColor);
+    connect(rgb_dialog,&QColorDialog::currentColorChanged,this,&Dialog::light_rgb);
 
-    connect(rgb_dialog,&QColorDialog::colorSelected,this,&Dialog::colordialog1_ok);
-    connect(rgb_dialog,&QColorDialog::finished,this,&Dialog::colordialog1_cancel);
+    connect(rgb_dialog,&QColorDialog::colorSelected,this,&Dialog::rgb_colordialog_ok);
+    connect(rgb_dialog,&QColorDialog::finished,this,&Dialog::rgb_colordialog_cancel);
 
     ui->pot_link->insertItems(0,{"red","green","blue","rgb"});
     ui->pot_link->setCurrentIndex(2); //def plava
@@ -64,58 +100,125 @@ Dialog::Dialog(QWidget *parent)
     ui->red_delay->setText(QString::number(default_delay));
     ui->red_delay->setMaxLength(MAX_DELAY_LENGTH);
 
+    ui->green_delay->setText(QString::number(default_delay));
+    ui->green_delay->setMaxLength(MAX_DELAY_LENGTH);
+
+    ui->blue_delay->setText(QString::number(default_delay));
+    ui->blue_delay->setMaxLength(MAX_DELAY_LENGTH);
+
+    ui->rgb_delay->setText(QString::number(default_delay));
+    ui->rgb_delay->setMaxLength(MAX_DELAY_LENGTH);
+
     connect(ui->red_delay,&QLineEdit::textChanged,this,&Dialog::red_delay_updated);
+    connect(ui->green_delay,&QLineEdit::textChanged,this,&Dialog::green_delay_updated);
+    connect(ui->blue_delay,&QLineEdit::textChanged,this,&Dialog::blue_delay_updated);
+    connect(ui->rgb_delay,&QLineEdit::textChanged,this,&Dialog::rgb_delay_updated);
 
     ui->volume_slider->setDisabled(true);
 
     connect(ui->can0_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C0);
+    connect(ui->can1_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C1);
+    connect(ui->can2_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C2);
+    connect(ui->can3_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C3);
+    connect(ui->can4_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C4);
+    connect(ui->can5_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C5);
+    connect(ui->can6_onoff,&QPushButton::clicked,this,&Dialog::iskljuci_C6);
 
 
-
-    connect(ui->C0_click,&QPushButton::clicked,this,&Dialog::C0SijaISvira);
+    connect(ui->C0_click,&QPushButton::pressed,this,&Dialog::can0_pressed);
+    connect(ui->C0_click,&QPushButton::released,this,&Dialog::can0_released);
     ui->C0_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C1_click,&QPushButton::clicked,this,&Dialog::C1SijaISvira);
+    connect(ui->C1_click,&QPushButton::pressed,this,&Dialog::can1_pressed);
+    connect(ui->C1_click,&QPushButton::released,this,&Dialog::can1_released);
     ui->C1_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C2_click,&QPushButton::clicked,this,&Dialog::C2SijaISvira);
+    connect(ui->C2_click,&QPushButton::pressed,this,&Dialog::can2_pressed);
+    connect(ui->C2_click,&QPushButton::released,this,&Dialog::can2_released);
     ui->C2_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C3_click,&QPushButton::clicked,this,&Dialog::C3SijaISvira);
+    connect(ui->C3_click,&QPushButton::pressed,this,&Dialog::can3_pressed);
+    connect(ui->C3_click,&QPushButton::released,this,&Dialog::can3_released);
     ui->C3_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C4_click,&QPushButton::clicked,this,&Dialog::C4SijaISvira);
+    connect(ui->C4_click,&QPushButton::pressed,this,&Dialog::can4_pressed);
+    connect(ui->C4_click,&QPushButton::released,this,&Dialog::can4_released);
     ui->C4_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C5_click,&QPushButton::clicked,this,&Dialog::C5SijaISvira);
+    connect(ui->C5_click,&QPushButton::pressed,this,&Dialog::can5_pressed);
+    connect(ui->C5_click,&QPushButton::released,this,&Dialog::can5_released);
     ui->C5_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
-    connect(ui->C6_click,&QPushButton::clicked,this,&Dialog::C6SijaISvira);
+    connect(ui->C6_click,&QPushButton::pressed,this,&Dialog::can6_pressed);
+    connect(ui->C6_click,&QPushButton::released,this,&Dialog::can6_released);
     ui->C6_click->setStyleSheet("* { background-color: rgba(0,125,0,0) }");
 
 
 
-    choose_note(ui->can0_changeNote); // puni pad. meni
+    puniPadMeni(ui->can0_changeNote); // puni pad. meni
+    puniPadMeni(ui->can1_changeNote);
+    puniPadMeni(ui->can2_changeNote);
+    puniPadMeni(ui->can3_changeNote);
+    puniPadMeni(ui->can4_changeNote);
+    puniPadMeni(ui->can5_changeNote);
+    puniPadMeni(ui->can6_changeNote);
 
     ui->can0_changeNote->setCurrentIndex(0) ; // podraz. vrednost (C dur)
-    connect(ui->can0_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad);
+    connect(ui->can0_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C0);
+
+    ui->can1_changeNote->setCurrentIndex(2) ;
+    connect(ui->can1_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C1);
+
+    ui->can2_changeNote->setCurrentIndex(4) ;
+    connect(ui->can2_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C2);
+
+    ui->can3_changeNote->setCurrentIndex(5) ;
+    connect(ui->can3_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C3);
+
+    ui->can4_changeNote->setCurrentIndex(7) ;
+    connect(ui->can4_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C4);
+
+    ui->can5_changeNote->setCurrentIndex(9) ;
+    connect(ui->can5_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C5);
+
+    ui->can6_changeNote->setCurrentIndex(11) ;
+    connect(ui->can6_changeNote,&QComboBox::currentTextChanged,this,&Dialog::izabranaNotaUPad_C6);
 
     ui->comboBox_samples->addItems(sample_names);
-    ui->comboBox_samples->setCurrentIndex(0);
+    ui->comboBox_samples->setCurrentIndex(0); //grand piano default
 
     connect(ui->can0_sharpen,&QPushButton::clicked,this,&Dialog::can0_sharp_pressed);
     connect(ui->can0_flatten,&QPushButton::clicked,this,&Dialog::can0_flat_pressed);
 
-    connect(ui->pushButton_major,&QPushButton::clicked,this,&Dialog::to_major);
-    to_major(true); // inicijalizacija
+    connect(ui->can1_sharpen,&QPushButton::clicked,this,&Dialog::can1_sharp_pressed);
+    connect(ui->can1_flatten,&QPushButton::clicked,this,&Dialog::can1_flat_pressed);
 
-    connect(ui->pushButton_minor,&QPushButton::clicked,this,&Dialog::to_minor);
+    connect(ui->can2_sharpen,&QPushButton::clicked,this,&Dialog::can2_sharp_pressed);
+    connect(ui->can2_flatten,&QPushButton::clicked,this,&Dialog::can2_flat_pressed);
+
+    connect(ui->can3_sharpen,&QPushButton::clicked,this,&Dialog::can3_sharp_pressed);
+    connect(ui->can3_flatten,&QPushButton::clicked,this,&Dialog::can3_flat_pressed);
+
+    connect(ui->can4_sharpen,&QPushButton::clicked,this,&Dialog::can4_sharp_pressed);
+    connect(ui->can4_flatten,&QPushButton::clicked,this,&Dialog::can4_flat_pressed);
+
+    connect(ui->can5_sharpen,&QPushButton::clicked,this,&Dialog::can5_sharp_pressed);
+    connect(ui->can5_flatten,&QPushButton::clicked,this,&Dialog::can5_flat_pressed);
+
+    connect(ui->can6_sharpen,&QPushButton::clicked,this,&Dialog::can6_sharp_pressed);
+    connect(ui->can6_flatten,&QPushButton::clicked,this,&Dialog::can6_flat_pressed);
+
+    connect(ui->pushButton_major,&QPushButton::clicked,this,&Dialog::emitMajorMinor); //emit major/minor
+    emitMajorMinor(true); // inicijalizacija
+
+    connect(ui->pushButton_minor,&QPushButton::clicked,this,&Dialog::emitMinorMajor);
 
     connect (this,&Dialog::major,this,&Dialog::puni_p_meni_major);
     connect (this,&Dialog::minor,this,&Dialog::puni_p_meni_minor);
 
     puni_p_meni_major(); // inic vrednost p menija
     ui->comboBox_scale->setCurrentIndex(0); // inic vr
+    connect (ui->comboBox_scale,&QComboBox::currentTextChanged,this,&Dialog::menjaj_skalu);
 
     ui->horizontalSlider_octave->setRange(-1,7); //octave slider
     ui->horizontalSlider_octave->setValue(3); // pod. vr.
@@ -133,6 +236,11 @@ Dialog::Dialog(QWidget *parent)
     connect(ui->input_on_off,&QCheckBox::stateChanged,this,&Dialog::input_on_off_stateChanged);
     connect(ui->output_on_off,&QCheckBox::stateChanged,this,&Dialog::output_on_off_stateChanged);
 
+    ui->colorBox->insertItems(0,{"All Red","All White","Rainbow"});
+    ui->colorBox->setCurrentIndex(0); //def plava
+
+    connect(ui->colorBox,&QComboBox::textActivated,this,changeAllColors);
+
 }
 
 Dialog::~Dialog()
@@ -144,9 +252,21 @@ Dialog::~Dialog()
 
     delete esp32;
     delete can0_colordialog;
+    delete can1_colordialog;
+    delete can2_colordialog;
+    delete can3_colordialog;
+    delete can4_colordialog;
+    delete can5_colordialog;
+    delete can6_colordialog;
     delete check_if_connected;
     delete rgb_dialog;
-    delete zvuk;
+    delete can0_zvuk;
+    delete can1_zvuk;
+    delete can2_zvuk;
+    delete can3_zvuk;
+    delete can4_zvuk;
+    delete can5_zvuk;
+    delete can6_zvuk;
 
     delete ui;
 }
@@ -216,20 +336,40 @@ void Dialog::readSerial() // cita serijski port, nakon | ce biti vrednost Rpot
 
 
 
-    void Dialog::write_diode(led_enum l, int delay_ms, int jacina)
+void Dialog::write_diode(led_enum l, int delay_ms, int jacina)
 {
     if (delay_ms<=0)return;
-    if (l==crvena && en_red == 0) return;
-    if (l==crvena) delay_ms =red_delay_ms;
 
-    if ( (esp32->write((QByteArray::number(l)).append(" , ").append(QByteArray::number(delay_ms)).append(" , ").append(QByteArray::number(jacina)).append('\0'))) == -1 )   //ako nije mogao upisati, '\0'
+    if (l==crvena && en_red == 0) return;
+    if (l==zelena && en_green == 0) return;
+    if (l==plava && en_blue == 0) return;
+
+    if (l==crvena) delay_ms =red_delay_ms;
+    else if (l==zelena) delay_ms =green_delay_ms;
+    else if (l==plava) delay_ms =blue_delay_ms;
+
+    string_to_write = (QByteArray::number(l)).append(" , ").append(QByteArray::number(delay_ms)).append(" , ").append(QByteArray::number(jacina)).append('\0');
+    if ( (esp32->write(string_to_write)) == -1 )   //ako nije mogao upisati, '\0'
     {
        // qDebug()<< "Nije moguce upaliti diodu";
         if (esp32_prikacen)
         {
-          QMessageBox prozor_greske (QMessageBox::Critical,"Error!","Device currently in use.",QMessageBox::Ok,this,Qt::Widget); //moze se namestiti da prikazuje eror
-          prozor_greske.setWindowModality(Qt::NonModal);
-          prozor_greske.exec(); //show
+        //QMessageBox prozor_greske (QMessageBox::Critical,"Error!","Device currently in use.",QMessageBox::Ok,this,Qt::Widget); //moze se namestiti da prikazuje eror
+        QMessageBox* prozor_greske = new QMessageBox(QMessageBox::Critical,"Serial Port Error","Couldn't write to device.",QMessageBox::NoButton,this);
+        prozor_greske->setStandardButtons(QMessageBox::NoButton);
+        prozor_greske->setInformativeText("Retrying...If persists, try reconnecting the device");
+        prozor_greske->setWindowModality(Qt::NonModal);
+
+        // napravi tajmer koji ce pokusavati da upise stalno
+        QTimer *timer_temp = new QTimer (this);
+        connect(timer_temp,&QTimer::timeout,this,&Dialog::pokusajUpisatiOpet);
+
+        connect(this,&Dialog::upis_uspesan,timer_temp,&QTimer::stop);
+        connect(this,&Dialog::upis_uspesan,prozor_greske,&QMessageBox::accept);
+        connect(this,&Dialog::upis_uspesan,timer_temp,&QTimer::deleteLater);
+        connect(this,&Dialog::upis_uspesan,prozor_greske,&QMessageBox::deleteLater);
+        timer_temp->start(CHECKING_RATE);
+        prozor_greske->exec();
         }
 
     }
@@ -284,19 +424,48 @@ void Dialog::value_changed(bool* pressed,int pot_value) //stalno ce se izvrsavat
 
 void Dialog::pushButton_clicked()
 {
-    write_diode(zelena,delay_ms,100); // od 0 do 100 jacine
+    write_diode(zelena,delay_ms,jacina_green); // od 0 do 100 jacine
     write_diode(crvena,delay_ms,jacina_red);
-    write_diode(plava,delay_ms,100);
-    write_diode(rgb_R,delay_ms,201); //C900FF
+    write_diode(plava,delay_ms,jacina_blue);
+    write_diode(rgb_R,delay_ms,201); //C900FF pink
     write_diode(rgb_G,delay_ms,0);
     write_diode(rgb_B,delay_ms,255);
 }
 
-void Dialog::pushButton_2_clicked()
+void Dialog::show_can0_colordialog()
 {
 
     can0_colordialog->show();
+}
 
+void Dialog::show_can1_colordialog()
+{
+    can1_colordialog->show();
+}
+
+void Dialog::show_can2_colordialog()
+{
+    can2_colordialog->show();
+}
+
+void Dialog::show_can3_colordialog()
+{
+    can3_colordialog->show();
+}
+
+void Dialog::show_can4_colordialog()
+{
+    can4_colordialog->show();
+}
+
+void Dialog::show_can5_colordialog()
+{
+    can5_colordialog->show();
+}
+
+void Dialog::show_can6_colordialog()
+{
+    can6_colordialog->show();
 }
 
 QPixmap Dialog::changeImageColor(const QString &path,const QColor &color)
@@ -333,6 +502,36 @@ void Dialog::changecolor_C0(const QColor &color)
     changecolor(color,C0_nota,ui->can0_pixmap);
 }
 
+void Dialog::changecolor_C1(const QColor &color)
+{
+    changecolor(color,C1_nota,ui->can1_pixmap);
+}
+
+void Dialog::changecolor_C2(const QColor &color)
+{
+    changecolor(color,C2_nota,ui->can2_pixmap);
+}
+
+void Dialog::changecolor_C3(const QColor &color)
+{
+    changecolor(color,C3_nota,ui->can3_pixmap);
+}
+
+void Dialog::changecolor_C4(const QColor &color)
+{
+    changecolor(color,C4_nota,ui->can4_pixmap);
+}
+
+void Dialog::changecolor_C5(const QColor &color)
+{
+    changecolor(color,C5_nota,ui->can5_pixmap);
+}
+
+void Dialog::changecolor_C6(const QColor &color)
+{
+    changecolor(color,C6_nota,ui->can6_pixmap);
+}
+
 void Dialog::changecolor(const QColor &color, QString nota_str, QLabel* can_pixmap_p) //p - pointer
 {
     QPixmap temp_pix(changeImageColor(CANRED_IMG,color));
@@ -352,19 +551,80 @@ QColor Dialog::to_darker_color(QColor oc,int times_darker) //oc - old color
 }
 
 
-void Dialog::colordialog_ok(const QColor &color)
+void Dialog::can_colordialog_ok(const QColor &color,void_noarg can_colordialog_declare_f,QColor* can_color_g,
+                                void_constqcolor changecolor_can,bool* can_colordialog_ok_pressed)
 {
-     qDebug()<<"Ok pritisnuto!";
+    // qDebug()<<"Ok pritisnuto!";
+     (this->*can_colordialog_declare_f)();
+     *can_color_g = color; // cuva u mem
+     (this->*changecolor_can)(to_darker_color(*can_color_g,3));//255/3
+     changeRgbLabelColor(rgb_color);
+     *can_colordialog_ok_pressed = true;
+}
+
+
+void Dialog::can0_colordialog_ok(const QColor &color)
+{
+/*
+    // qDebug()<<"Ok pritisnuto!";
      can0_colordialog_declare();
      C0_color = color; // cuva u mem
      changecolor_C0(to_darker_color(C0_color,3));//255/3
      changeRgbLabelColor(rgb_color);
-     colordialog_ok_pressed = true;
+     can0_colordialog_ok_pressed = true;
+*/
+     can_colordialog_ok(color,can0_colordialog_declare,&C0_color,changecolor_C0,&can0_colordialog_ok_pressed);
 }
 
-void Dialog::colordialog_cancel()
+void Dialog::can1_colordialog_ok(const QColor &color)
 {
-     if (!colordialog_ok_pressed)
+     can_colordialog_ok(color,can1_colordialog_declare,&C1_color,changecolor_C1,&can1_colordialog_ok_pressed);
+}
+
+void Dialog::can2_colordialog_ok(const QColor &color)
+{
+     can_colordialog_ok(color,can2_colordialog_declare,&C2_color,changecolor_C2,&can2_colordialog_ok_pressed);
+}
+
+void Dialog::can3_colordialog_ok(const QColor &color)
+{
+     can_colordialog_ok(color,can3_colordialog_declare,&C3_color,changecolor_C3,&can3_colordialog_ok_pressed);
+}
+
+void Dialog::can4_colordialog_ok(const QColor &color)
+{
+     can_colordialog_ok(color,can4_colordialog_declare,&C4_color,changecolor_C4,&can4_colordialog_ok_pressed);
+}
+
+void Dialog::can5_colordialog_ok(const QColor &color)
+{
+     can_colordialog_ok(color,can5_colordialog_declare,&C5_color,changecolor_C5,&can5_colordialog_ok_pressed);
+}
+
+void Dialog::can6_colordialog_ok(const QColor &color)
+{
+     can_colordialog_ok(color,can6_colordialog_declare,&C6_color,changecolor_C6,&can6_colordialog_ok_pressed);
+}
+
+void Dialog::can_colordialog_cancel(bool* can_colordialog_ok_pressed,void_noarg can_colordialog_declare_f,void_constqcolor changecolor_can_f
+                                    ,QColor* can_color_g)
+{
+     if (!(*can_colordialog_ok_pressed))
+     {
+        //qDebug()<<"Cancel ili X pritisnuto!";
+        (this->*can_colordialog_declare_f)();
+        (this->*changecolor_can_f)(to_darker_color(*can_color_g,3));
+        changeRgbLabelColor(rgb_color);
+     }
+     else
+        *can_colordialog_ok_pressed = false;
+}
+
+
+void Dialog::can0_colordialog_cancel()
+{
+/*
+     if (!can0_colordialog_ok_pressed)
      {
       qDebug()<<"Cancel ili X pritisnuto!";
       can0_colordialog_declare();
@@ -372,11 +632,47 @@ void Dialog::colordialog_cancel()
       changeRgbLabelColor(rgb_color);
      }
      else
-      colordialog_ok_pressed = false;
+      can0_colordialog_ok_pressed = false;
+*/
+     can_colordialog_cancel(&can0_colordialog_ok_pressed,can0_colordialog_declare,changecolor_C0,&C0_color);
+}
+
+void Dialog::can1_colordialog_cancel()
+{
+     can_colordialog_cancel(&can1_colordialog_ok_pressed,can1_colordialog_declare,changecolor_C1,&C1_color);
+}
+
+void Dialog::can2_colordialog_cancel()
+{
+     can_colordialog_cancel(&can2_colordialog_ok_pressed,can2_colordialog_declare,changecolor_C2,&C2_color);
+}
+
+void Dialog::can3_colordialog_cancel()
+{
+     can_colordialog_cancel(&can3_colordialog_ok_pressed,can3_colordialog_declare,changecolor_C3,&C3_color);
+}
+
+void Dialog::can4_colordialog_cancel()
+{
+     can_colordialog_cancel(&can4_colordialog_ok_pressed,can4_colordialog_declare,changecolor_C4,&C4_color);
+}
+
+void Dialog::can5_colordialog_cancel()
+{
+     can_colordialog_cancel(&can5_colordialog_ok_pressed,can5_colordialog_declare,changecolor_C5,&C5_color);
+}
+
+void Dialog::can6_colordialog_cancel()
+{
+     can_colordialog_cancel(&can6_colordialog_ok_pressed,can6_colordialog_declare,changecolor_C6,&C6_color);
 }
 
 void Dialog::write_rgb(const QColor &color, int delay , int jacina_rgb ) //max 100
 {
+
+     if (!en_rgb) return;
+     delay = rgb_delay_ms;
+
      QColor color_to_write = color;
      if ( jacina_rgb == -1) // ako nije poslata jacina
       jacina_rgb = color_to_write.value();
@@ -435,8 +731,11 @@ void Dialog::delay_updated (const QString &text)
 
 */
 
-     errorCheckDelay(text,ui->lineEdit_1,ui->label_error,delay_ms); //delay_ms se menja
+     errorCheckDelay(text,ui->lineEdit_delay,ui->label_error,&delay_ms); //delay_ms se menja
      ui->red_delay->setText(QString::number(delay_ms));
+     ui->green_delay->setText(QString::number(delay_ms));
+     ui->blue_delay->setText(QString::number(delay_ms));
+     ui->rgb_delay->setText(QString::number(delay_ms));
 }
 
 void Dialog::changeRgbLabelColor(const QColor& color)
@@ -444,8 +743,54 @@ void Dialog::changeRgbLabelColor(const QColor& color)
     ui->label_rgb->setPixmap(changeImageColor(REDDIODE_IMG,color));
 }
 
-void Dialog::red_butt_clicked () // pressed = true - on
+
+void Dialog::x_onoff (bool* en_x_g,QPushButton* onoff_but_p,QLabel* label_x_p,led_enum led_boja,int* jacina_x_g) // pressed = true - on
 {
+    //clicked - jedino na korisnikove klikove se poziva
+    *en_x_g=*en_x_g^1;
+    //  qDebug()<<en_red;
+    if (!(*en_x_g))
+    {
+      onoff_but_p->setText("OFF");
+      int r = 0, g = 0, b = 0;
+      if (led_boja == crvena) r = 128;
+      else if (led_boja == zelena) g = 128;
+      else if (led_boja == plava) b = 128; //255/2 ne vidi se promena ispod 128
+      else if (led_boja == rgb)
+            {
+                QColor color_temp = rgb_color;
+                color_temp.setHsv(color_temp.hue(),color_temp.saturation(),color_temp.value()/2);
+                r=color_temp.red(); g=color_temp.green(); b=color_temp.blue();
+            }
+      label_x_p->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(r,g,b)));
+    }
+    else
+    {
+      onoff_but_p->setText("ON");
+      qreal logBrightness = QAudio::convertVolume(*jacina_x_g / qreal(100.0), //0-100 -> 0.0-1.0
+                                                     QAudio::LinearVolumeScale,
+                                                    QAudio::LogarithmicVolumeScale);
+      int logBrightness_int = qRound(logBrightness*100); // u linearnu skalu
+      int x_max_255 = doubleMap(logBrightness_int,0,100,128,255); //pretvori
+      int r = 0, g = 0, b = 0;
+      if (led_boja == crvena) r = x_max_255;
+      else if (led_boja == zelena) g = x_max_255;
+      else if (led_boja == plava) b = x_max_255;
+      else if (led_boja == rgb)
+      {
+            x_max_255 = doubleMap(logBrightness_int,0,100,0,255);
+            QColor color_temp = rgb_color;
+            color_temp.setHsv(color_temp.hue(),color_temp.saturation(),x_max_255);
+            r=color_temp.red(); g=color_temp.green(); b=color_temp.blue();
+      }
+      label_x_p->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(r,g,b)));
+    }
+}
+
+
+void Dialog::red_onoff () // pressed = true - on
+{
+ /*
     //clicked - jedino na korisnikove klikove se poziva
     en_red=en_red^1;
   //  qDebug()<<en_red;
@@ -460,16 +805,96 @@ void Dialog::red_butt_clicked () // pressed = true - on
         int red_max_255 = doubleMap(jacina_red,0,100,128,255); //pretvori
         ui->label_red->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(red_max_255,0,0)));
     }
+*/
+    x_onoff(&en_red,ui->pushButton_red,ui->label_red,crvena,&jacina_red);
 }
+void Dialog::green_onoff ()
+{
+    x_onoff(&en_green,ui->pushButton_green,ui->label_green,zelena,&jacina_green);
+}
+
+void Dialog::blue_onoff ()
+{
+    x_onoff(&en_blue,ui->pushButton_blue,ui->label_blue,plava,&jacina_blue);
+}
+
+void Dialog::rgb_onoff ()
+{
+    x_onoff(&en_rgb,ui->pushButton_rgb,ui->label_rgb,rgb,&jacina_rgb);
+}
+
 
 void Dialog::redled_pic_clicked()
 {
     write_diode(crvena,delay_ms,jacina_red); // jacina
 }
 
-void Dialog::red_jacina_change(int red_jacina_novo)
+void Dialog::greenled_pic_clicked()
+{
+    write_diode(zelena,delay_ms,jacina_green);
+}
+
+void Dialog::blueled_pic_clicked()
+{
+    write_diode(plava,delay_ms,jacina_blue);
+}
+
+void Dialog::rgbled_pic_clicked()
+{
+    write_rgb(rgb_color,delay_ms,jacina_rgb);
+}
+
+
+
+
+void Dialog::x_jacina_change(int x_jacina_novo,int* jacina_x_g,led_enum boja,QLabel* label_x_p)
 {
 
+    *jacina_x_g = x_jacina_novo; //jacina_x - 0 do 100
+
+    qreal linearBrightness = QAudio::convertVolume(*jacina_x_g / qreal(100.0), //0-100 -> 0.0-1.0
+                                                   QAudio::LogarithmicVolumeScale,
+                                                   QAudio::LinearVolumeScale);
+    *jacina_x_g = qRound(linearBrightness*100); // u log skalu
+
+    switch (boja)
+    {
+        case crvena: if (!en_red) return; break;
+        case zelena: if (!en_green) return; break;
+        case plava: if (!en_blue) return; break;
+        case rgb: if (!en_rgb) return; break;
+        default: break;
+    }
+    if (ui->lightWhileChanging_B->isChecked())
+    {
+      if (boja!=rgb)
+        write_diode(boja,delay_ms,*jacina_x_g);
+      else
+        write_rgb(rgb_color,delay_ms,*jacina_x_g);
+    }
+
+    int x_max_255 = doubleMap(x_jacina_novo,0,100,128,255); //pretvori
+    int r=0,g=0,b=0;
+    QColor boja_pom = rgb_color;
+    switch(boja)
+    {
+        case crvena: r=x_max_255; break;
+        case zelena: g=x_max_255; break;
+        case plava: b=x_max_255; break;
+        case rgb:
+            x_max_255 = doubleMap(x_jacina_novo,0,100,0,255);
+            boja_pom.setHsv(boja_pom.hue(),boja_pom.saturation(),x_max_255);
+            r= boja_pom.red(); g= boja_pom.green(); b= boja_pom.blue();
+            break;
+        default: break;
+    }
+    label_x_p->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(r,g,b)));
+
+}
+
+void Dialog::red_jacina_change(int red_jacina_novo)
+{
+/*
     jacina_red = red_jacina_novo; //jacina_red - 0 do 100
 
     qreal linearBrightness = QAudio::convertVolume(jacina_red / qreal(100.0), //0-100 -> 0.0-1.0
@@ -478,10 +903,27 @@ void Dialog::red_jacina_change(int red_jacina_novo)
     jacina_red = qRound(linearBrightness*100); // u log skalu
 
     if (!en_red) return;
-    //write_diode(crvena,delay_ms,jacina_red); // bice opcija za ovo
+    if (ui->lightWhileChanging_B->isChecked())
+        write_diode(crvena,delay_ms,jacina_red); // bice opcija za ovo
     int red_max_255 = doubleMap(red_jacina_novo,0,100,128,255); //pretvori
     ui->label_red->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(red_max_255,0,0)));
+*/
+    x_jacina_change(red_jacina_novo,&jacina_red,crvena,ui->label_red);
+}
 
+void Dialog::green_jacina_change(int green_jacina_novo)
+{
+    x_jacina_change(green_jacina_novo,&jacina_green,zelena,ui->label_green);
+}
+
+void Dialog::blue_jacina_change(int blue_jacina_novo)
+{
+    x_jacina_change(blue_jacina_novo,&jacina_blue,plava,ui->label_blue);
+}
+
+void Dialog::rgb_jacina_change(int rgb_jacina_novo)
+{
+    x_jacina_change(rgb_jacina_novo,&jacina_rgb,rgb,ui->label_rgb);
 }
 
 int Dialog::doubleMap(double x, double in_min, double in_max, double out_min,double out_max)
@@ -491,12 +933,18 @@ int Dialog::doubleMap(double x, double in_min, double in_max, double out_min,dou
 
 void Dialog::pot_value_is_changing(int pot_value)
 {
+    changeVolumeSlider(pot_value);
+
+    qreal linearBrightness = QAudio::convertVolume(pot_value / qreal(100.0), //0-100 -> 0.0-1.0
+                                                   QAudio::LogarithmicVolumeScale,
+                                                   QAudio::LinearVolumeScale);
+    pot_value = qRound(linearBrightness*100); // u log skalu
     if (pot_led!=rgb)
         write_diode(pot_led,delay_ms,pot_value);
     else
         write_rgb(rgb_color,delay_ms,pot_value);
 
-    changeVolumeSlider(pot_value);
+
 }
 
 
@@ -575,25 +1023,29 @@ void Dialog::popup_change_color_rgb()
 
 }
 
-void Dialog::colordialog1_ok(const QColor& color)
+void Dialog::rgb_colordialog_ok(const QColor& color)
 {
     //Ok pritisnuto
     rgb_color = color;
     changeRgbLabelColor(rgb_color);
-    colordialog1_ok_pressed = true;
+    int value_max100 = doubleMap(color.value(),0,255,0,100);
+    ui->spinBox_rgb->setValue(value_max100);
+    rgb_colordialog_ok_pressed = true;
 }
 
-void Dialog::colordialog1_cancel()
+void Dialog::rgb_colordialog_cancel()
 {
-    if (!colordialog1_ok_pressed)
+    if (!rgb_colordialog_ok_pressed)
     {
         //Cancel ili X pritisnuto
 
         changeRgbLabelColor(rgb_color);
+        disconnect(rgb_dialog,&QColorDialog::currentColorChanged,this,&Dialog::light_rgb);
         rgb_dialog->setCurrentColor(rgb_color);
+        connect(rgb_dialog,&QColorDialog::currentColorChanged,this,&Dialog::light_rgb);
     }
     else
-        colordialog1_ok_pressed = false;
+        rgb_colordialog_ok_pressed = false;
 }
 
 void Dialog::linkLedToPot(const QString &text) // tekst- red green blue rgb
@@ -604,9 +1056,48 @@ void Dialog::linkLedToPot(const QString &text) // tekst- red green blue rgb
     if(text=="rgb")pot_led = rgb;
 }
 
+void Dialog::x_delay_updated(const QString &text,QLineEdit* x_delay_p,QLabel* label_error_x_p,int* x_delay_ms_g,QLabel* label_x,
+                             led_enum boja,bool* en_x_g,int* jacina_x_g) //text = vrednost delay za red
+{
+    errorCheckDelay(text,x_delay_p,label_error_x_p,x_delay_ms_g);
+    if (*x_delay_ms_g == 0)
+    {
+        int r=0,g=0,b=0;
+        switch(boja)
+        {
+            case crvena:r=128;break;
+            case zelena:g=128;break;
+            case plava:b=128;break;
+            case rgb: break;
+            default:break;
+        }
+            label_x->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(r,g,b)));
+    }
+    else if(*en_x_g)
+    {
+        int xMax_255 = doubleMap(*jacina_x_g,0,100,128,255); //pretvori
+        int r=0,g=0,b=0;
+        QColor temp_c = rgb_color;
+        switch(boja)
+        {
+        case crvena:r=xMax_255;break;
+        case zelena:g=xMax_255;break;
+        case plava:b=xMax_255;break;
+        case rgb:
+            xMax_255 = doubleMap(*jacina_x_g,0,100,0,255);
+            temp_c.setHsv(temp_c.hue(),temp_c.saturation(),xMax_255);
+            r= temp_c.red(); g= temp_c.green(); b= temp_c.blue();
+            break;
+        default: break;
+        }
+        label_x->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(r,g,b)));
+    }
+}
+
 void Dialog::red_delay_updated(const QString &text) //text = vrednost delay za red
 {
-    errorCheckDelay(text,ui->red_delay,ui->label_error_red,red_delay_ms);
+/*
+    errorCheckDelay(text,ui->red_delay,ui->label_error_red,&red_delay_ms);
     if (red_delay_ms == 0)
         ui->label_red->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(128,0,0)));
     else if(en_red)
@@ -614,10 +1105,26 @@ void Dialog::red_delay_updated(const QString &text) //text = vrednost delay za r
         int redMax_255 = doubleMap(jacina_red,0,100,128,255); //pretvori
         ui->label_red->setPixmap(changeImageColor(REDDIODE_IMG,QColor::fromRgb(redMax_255,0,0)));
     }
+*/
+    x_delay_updated(text,ui->red_delay,ui->label_error_red,&red_delay_ms,ui->label_red,crvena,&en_red,&jacina_red);
 }
 
+void Dialog::green_delay_updated(const QString &text)
+{
+    x_delay_updated(text,ui->green_delay,ui->label_error_green,&green_delay_ms,ui->label_green,zelena,&en_green,&jacina_green);
+}
 
-void Dialog::errorCheckDelay(const QString& text, QLineEdit*& qLineEdit_pointer, QLabel*& errorLabel_pointer, int& delay_)
+void Dialog::blue_delay_updated(const QString &text)
+{
+    x_delay_updated(text,ui->blue_delay,ui->label_error_blue,&blue_delay_ms,ui->label_blue,plava,&en_blue,&jacina_blue);
+}
+
+void Dialog::rgb_delay_updated(const QString &text)
+{
+    x_delay_updated(text,ui->rgb_delay,ui->label_error_rgb,&rgb_delay_ms,ui->label_rgb,rgb,&en_rgb,&jacina_rgb);
+}
+
+void Dialog::errorCheckDelay(const QString& text, QLineEdit* x_delay_p, QLabel* label_error_x_p, int* x_delay_ms_g)
 
 {
 
@@ -627,34 +1134,34 @@ void Dialog::errorCheckDelay(const QString& text, QLineEdit*& qLineEdit_pointer,
         //qDebug()<<"Uneti string je broj!";
         bool ok;                          //ako su sve nule
         int text_int = text.toInt(&ok);
-        if (ok) qLineEdit_pointer->setText(QString::number(text_int));
+        if (ok) x_delay_p->setText(QString::number(text_int));
         if (text_int==0 && ok)
         {
             QString temp_s;
-            if (qLineEdit_pointer == ui->lineEdit_1) temp_s = "<font color='purple'>Diodes off.</font>";
+            if (x_delay_p == ui->lineEdit_delay) temp_s = "<font color='purple'>Diodes off.</font>";
             else temp_s = "<font color='purple'>Diode off.</font>";
-                errorLabel_pointer->setText(temp_s);
+                label_error_x_p->setText(temp_s);
 
-            delay_ = text_int;
+            *x_delay_ms_g = text_int;
         }
         else
         {
-            errorLabel_pointer->setText(""); //validna vrednost uneta
-            delay_ = text_int;
+            label_error_x_p->setText(""); //validna vrednost uneta
+            *x_delay_ms_g = text_int;
         }
     }
     else
     {
         // qDebug()<<"Uneti string nije broj!";
-        errorLabel_pointer->setText("<font color='red'>Input invalid!</font>");
-        qLineEdit_pointer->setText("");
-        delay_ = 0;
+        label_error_x_p->setText("<font color='red'>Input invalid!</font>");
+        x_delay_p->setText("");
+        *x_delay_ms_g = 0;
     }
 
     if (text=="")
     {
-        errorLabel_pointer->setText("<font color='red'>Insert a value!</font>");
-        delay_ = 0;
+        label_error_x_p->setText("<font color='red'>Insert a value!</font>");
+        *x_delay_ms_g = 0;
     }
 
 }
@@ -668,9 +1175,34 @@ void Dialog::can_pressedOrReleased(bool* pressed,QVector<int> c_changed) //kao i
 
     foreach(int i, c_changed)
     {
+        bool is_pressed = pressed[i]==1;
         if (i == 0 && C0_on) //first can
         {
-            doWhenPressedOrReleased(pressed[i]==1);
+            doWhenPressedOrReleased(is_pressed,ui->can0_onoff,changecolor_C0,C0_color,ui->can0_changeNote);
+        }
+        if (i == 1 && C1_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can1_onoff,changecolor_C1,C1_color,ui->can1_changeNote);
+        }
+        if (i == 2 && C2_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can2_onoff,changecolor_C2,C2_color,ui->can2_changeNote);
+        }
+        if (i == 3 && C3_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can3_onoff,changecolor_C3,C3_color,ui->can3_changeNote);
+        }
+        if (i == 4 && C4_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can4_onoff,changecolor_C4,C4_color,ui->can4_changeNote);
+        }
+        if (i == 5 && C5_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can5_onoff,changecolor_C5,C5_color,ui->can5_changeNote);
+        }
+        if (i == 6 && C6_on)
+        {
+            doWhenPressedOrReleased(is_pressed,ui->can6_onoff,changecolor_C6,C6_color,ui->can6_changeNote);
         }
     }
 }
@@ -682,8 +1214,24 @@ void Dialog::changeVolumeSlider(int new_value)
     ui->volume_slider->setDisabled(true);
 }
 
+void Dialog::can_colordialog_declare(QColorDialog** can_colordialog_g, void_constqcolor changecolor_can_f, void_constqcolor can_colordialog_ok_f, void_noarg can_colordialog_cancel_f)
+{
+    *can_colordialog_g = new QColorDialog(default_rgb,this); // can1
+    //(*can_colordialog_g)->setOption(QColorDialog::DontUseNativeDialog);
+    connect(*can_colordialog_g,&QColorDialog::currentColorChanged,this,changecolor_can_f);
+
+    connect(*can_colordialog_g,&QColorDialog::currentColorChanged,this,&Dialog::changeRgbLabelColor);
+    connect(*can_colordialog_g,&QColorDialog::currentColorChanged,this,&Dialog::light_rgb);
+
+    connect(*can_colordialog_g,&QColorDialog::colorSelected,this,can_colordialog_ok_f);
+    connect(*can_colordialog_g,&QColorDialog::finished,this,can_colordialog_cancel_f);
+
+}
+
+
 void Dialog::can0_colordialog_declare()
 {
+    /*
     can0_colordialog = new QColorDialog(default_rgb,this); // can1
     //can0_colordialog->setOption(QColorDialog::DontUseNativeDialog);
     connect(can0_colordialog,&QColorDialog::currentColorChanged,this,&Dialog::changecolor_C0);
@@ -692,10 +1240,62 @@ void Dialog::can0_colordialog_declare()
 
     connect(can0_colordialog,&QColorDialog::colorSelected,this,&Dialog::colordialog_ok);
     connect(can0_colordialog,&QColorDialog::finished,this,&Dialog::colordialog_cancel);
+*/
+    can_colordialog_declare(&can0_colordialog,changecolor_C0,can0_colordialog_ok,can0_colordialog_cancel);
 }
+
+void Dialog::can1_colordialog_declare()
+{
+    can_colordialog_declare(&can1_colordialog,changecolor_C1,can1_colordialog_ok,can1_colordialog_cancel);
+}
+
+void Dialog::can2_colordialog_declare()
+{
+    can_colordialog_declare(&can2_colordialog,changecolor_C2,can2_colordialog_ok,can2_colordialog_cancel);
+}
+
+void Dialog::can3_colordialog_declare()
+{
+    can_colordialog_declare(&can3_colordialog,changecolor_C3,can3_colordialog_ok,can3_colordialog_cancel);
+}
+
+void Dialog::can4_colordialog_declare()
+{
+    can_colordialog_declare(&can4_colordialog,changecolor_C4,can4_colordialog_ok,can4_colordialog_cancel);
+}
+
+void Dialog::can5_colordialog_declare()
+{
+    can_colordialog_declare(&can5_colordialog,changecolor_C5,can5_colordialog_ok,can5_colordialog_cancel);
+}
+
+void Dialog::can6_colordialog_declare()
+{
+    can_colordialog_declare(&can6_colordialog,changecolor_C6,can6_colordialog_ok,can6_colordialog_cancel);
+}
+
+void Dialog::iskljuci_can(QPushButton* can_onoff_p,bool* can_on_g)
+{
+    bool on;
+    if (can_onoff_p->text()=="ON") //gasi se
+    {
+        can_onoff_p->setText("OFF");
+
+        on = false;
+    }
+    else  // pali se
+    {
+        can_onoff_p->setText("ON");
+        on = true;
+    }
+    *can_on_g = on;
+
+}
+
 
 void Dialog::iskljuci_C0()
 {
+/*
     bool on;
     if (ui->can0_onoff->text()=="ON") //gasi se
     {
@@ -709,7 +1309,38 @@ void Dialog::iskljuci_C0()
         on = true;
     }
     C0_on = on;
+*/
+    iskljuci_can(ui->can0_onoff,&C0_on);
+}
 
+void Dialog::iskljuci_C1()
+{
+    iskljuci_can(ui->can1_onoff,&C1_on);
+}
+
+void Dialog::iskljuci_C2()
+{
+    iskljuci_can(ui->can2_onoff,&C2_on);
+}
+
+void Dialog::iskljuci_C3()
+{
+    iskljuci_can(ui->can3_onoff,&C3_on);
+}
+
+void Dialog::iskljuci_C4()
+{
+    iskljuci_can(ui->can4_onoff,&C4_on);
+}
+
+void Dialog::iskljuci_C5()
+{
+    iskljuci_can(ui->can5_onoff,&C5_on);
+}
+
+void Dialog::iskljuci_C6()
+{
+    iskljuci_can(ui->can6_onoff,&C6_on);
 }
 
 
@@ -729,49 +1360,152 @@ QColor Dialog::findTextColor(const QColor &color) // kako tekst uvek da se vidi 
     return ret;
 }
 
-void Dialog::C0SijaISvira()
+void Dialog::can0_pressed()
 {
-    static bool counter_C0 = 0;
-    counter_C0 = counter_C0^1;
-    doWhenPressedOrReleased(counter_C0);
+    doWhenPressedOrReleased(true,ui->can0_onoff,changecolor_C0,C0_color,ui->can0_changeNote);
 }
 
-void Dialog::choose_note(QComboBox *c) // ubacivanje imena nota u padajuci meni
+void Dialog::can0_released()
+{
+    doWhenPressedOrReleased(false,ui->can0_onoff,changecolor_C0,C0_color,ui->can0_changeNote);
+}
+
+
+void Dialog::can1_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can1_onoff,changecolor_C1,C1_color,ui->can1_changeNote);
+}
+
+void Dialog::can1_released()
+{
+    doWhenPressedOrReleased(false,ui->can1_onoff,changecolor_C1,C1_color,ui->can1_changeNote);
+}
+
+
+void Dialog::can2_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can2_onoff,changecolor_C2,C2_color,ui->can2_changeNote);
+}
+
+void Dialog::can2_released()
+{
+    doWhenPressedOrReleased(false,ui->can2_onoff,changecolor_C2,C2_color,ui->can2_changeNote);
+}
+
+
+void Dialog::can3_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can3_onoff,changecolor_C3,C3_color,ui->can3_changeNote);
+}
+
+void Dialog::can3_released()
+{
+    doWhenPressedOrReleased(false,ui->can3_onoff,changecolor_C3,C3_color,ui->can3_changeNote);
+}
+
+
+void Dialog::can4_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can4_onoff,changecolor_C4,C4_color,ui->can4_changeNote);
+}
+
+void Dialog::can4_released()
+{
+    doWhenPressedOrReleased(false,ui->can4_onoff,changecolor_C4,C4_color,ui->can4_changeNote);
+}
+
+
+void Dialog::can5_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can5_onoff,changecolor_C5,C5_color,ui->can5_changeNote);
+}
+
+void Dialog::can5_released()
+{
+    doWhenPressedOrReleased(false,ui->can5_onoff,changecolor_C5,C5_color,ui->can5_changeNote);
+}
+
+
+void Dialog::can6_pressed()
+{
+    doWhenPressedOrReleased(true,ui->can6_onoff,changecolor_C6,C6_color,ui->can6_changeNote);
+}
+
+void Dialog::can6_released()
+{
+    doWhenPressedOrReleased(false,ui->can6_onoff,changecolor_C6,C6_color,ui->can6_changeNote);
+}
+
+
+void Dialog::puniPadMeni(QComboBox* can_changeNote) // ubacivanje imena nota u padajuci meni
 {
 
-    int old_index = c->currentIndex();
+    int old_index = can_changeNote->currentIndex();
 
-    if (c->count()!=0) c->clear();
+    if (can_changeNote->count()!=0) can_changeNote->clear();
     for (int i=0;i<12;i++)
     {
         if (sharp_or_flat==sharp)
         {
             QString string_sharp (note_names_sharp[i]);
-            c->insertItem(i+1,string_sharp,0);
+            can_changeNote->insertItem(i+1,string_sharp,0);
         }
         if (sharp_or_flat==flat)
         {
             QString string_flat (note_names_flat[i]);
-            c->insertItem(i+1,string_flat,0);
+            can_changeNote->insertItem(i+1,string_flat,0);
         }
     }
-    c->setCurrentIndex(old_index);
+    can_changeNote->setCurrentIndex(old_index);
 }
 
-void Dialog::izabranaNotaUPad(const QString &note)
+void Dialog::izabranaNotaUPad(const QString &note,QString* nota_g_p,QLabel* can_pixmap_p,void_constqcolor func)
 {
-
-    C0_nota = note;
-    QImage can_image = ui->can0_pixmap->pixmap(Qt::ReturnByValue).toImage();
-    int img_width = ui->can0_pixmap->pixmap(Qt::ReturnByValue).rect().width();
-    int img_height = ui->can0_pixmap->pixmap(Qt::ReturnByValue).rect().height();
+    *nota_g_p = note;
+    QImage can_image = can_pixmap_p->pixmap(Qt::ReturnByValue).toImage();
+    int img_width = can_pixmap_p->pixmap(Qt::ReturnByValue).rect().width();
+    int img_height = can_pixmap_p->pixmap(Qt::ReturnByValue).rect().height();
     QColor img_color = can_image.pixelColor(img_width/2,img_height/5);
+    (this->*func)(img_color);     // ista boja ali razl. tekst
 
-    changecolor_C0(img_color); // ista boja ali razl. tekst
 }
 
+void Dialog::izabranaNotaUPad_C0(const QString &note)
+{
+    izabranaNotaUPad(note,&C0_nota,ui->can0_pixmap,changecolor_C0);
+}
 
-void Dialog::svirajNotuCB (QComboBox *c) // cb - combobox jer je u cb ime note
+void Dialog::izabranaNotaUPad_C1(const QString &note)
+{
+    izabranaNotaUPad(note,&C1_nota,ui->can1_pixmap,changecolor_C1);
+}
+
+void Dialog::izabranaNotaUPad_C2(const QString &note)
+{
+    izabranaNotaUPad(note,&C2_nota,ui->can2_pixmap,changecolor_C2);
+}
+
+void Dialog::izabranaNotaUPad_C3(const QString &note)
+{
+    izabranaNotaUPad(note,&C3_nota,ui->can3_pixmap,changecolor_C3);
+}
+
+void Dialog::izabranaNotaUPad_C4(const QString &note)
+{
+    izabranaNotaUPad(note,&C4_nota,ui->can4_pixmap,changecolor_C4);
+}
+
+void Dialog::izabranaNotaUPad_C5(const QString &note)
+{
+    izabranaNotaUPad(note,&C5_nota,ui->can5_pixmap,changecolor_C5);
+}
+
+void Dialog::izabranaNotaUPad_C6(const QString &note)
+{
+    izabranaNotaUPad(note,&C6_nota,ui->can6_pixmap,changecolor_C6);
+}
+
+void Dialog::svirajNotuCB (QComboBox *can_changeNote_p) // cb - combobox jer je u cb ime note
 {
     QString ime_sampla;
     int sample_izabran = ui->comboBox_samples->currentIndex();
@@ -783,10 +1517,10 @@ void Dialog::svirajNotuCB (QComboBox *c) // cb - combobox jer je u cb ime note
     else if (sample_izabran==4)  ime_sampla = "industrial pad/industrial pad - ";
     else if (sample_izabran==5)  ime_sampla = "current value h/current value h - ";
 
-    QString temp (c->currentText());
+    QString temp (can_changeNote_p->currentText());
 
     if (temp.contains("b"))
-        temp = note_names_sharp[c->currentIndex()];
+        temp = note_names_sharp[can_changeNote_p->currentIndex()];
 
     if (temp.contains("♯"))
         temp.replace(QString("♯"),QString("s"));
@@ -802,7 +1536,7 @@ void Dialog::svirajNotuCB (QComboBox *c) // cb - combobox jer je u cb ime note
         {
             for (int j =0;j<8;j++)
             {
-                if (all_scales[i][j]==c->currentText())
+                if (all_scales[i][j]==can_changeNote_p->currentText())
                 {
                             if (scale_helper[i][j-1])
                             {
@@ -820,74 +1554,180 @@ void Dialog::svirajNotuCB (QComboBox *c) // cb - combobox jer je u cb ime note
     ime_sampla.prepend("file:///");
     QUrl url_sampla= QUrl(ime_sampla);
     // url_sampla.toLocalFile();
-    zvuk->setSource(url_sampla);
+    QSoundEffect* can_zvuk;
+    if      (can_changeNote_p == ui->can0_changeNote)
+        can_zvuk =  can0_zvuk;
+    else if (can_changeNote_p == ui->can1_changeNote)
+        can_zvuk =  can1_zvuk;
+    else if (can_changeNote_p == ui->can2_changeNote)
+        can_zvuk =  can2_zvuk;
+    else if (can_changeNote_p == ui->can3_changeNote)
+        can_zvuk =  can3_zvuk;
+    else if (can_changeNote_p == ui->can4_changeNote)
+        can_zvuk =  can4_zvuk;
+    else if (can_changeNote_p == ui->can5_changeNote)
+        can_zvuk =  can5_zvuk;
+    else if (can_changeNote_p == ui->can6_changeNote)
+        can_zvuk =  can6_zvuk;
+
+    can_zvuk->setSource(url_sampla);
 
     int volumeSliderValue = ui->volume_slider->value();
     qreal linearVolume /* = QAudio::convertVolume(volumeSliderValue / qreal(100.0),
                                                QAudio::LogarithmicVolumeScale,
                                                QAudio::LinearVolumeScale)*/;
     linearVolume = volumeSliderValue / qreal(100.0);
-    zvuk->setVolume(linearVolume);
+    can_zvuk->setVolume(linearVolume);
     //qDebug ()<<"Jacina note je"<<linearVolume;
-    zvuk->play();
+    can_zvuk->play();
 
 
 
 }
 
 
-void Dialog::doWhenPressedOrReleased(bool c_pressed)//,QOushButton* can_onoff_p,void (*changecolor_can)(QColor& can_color),QColor& can_color
-{
+void Dialog::doWhenPressedOrReleased(bool c_pressed, QPushButton* can_onoff_p, void_constqcolor f, QColor& can_color_g, QComboBox* can_changeNote_p)   //,QOushButton* can_onoff_p,void (*void_constqcolor)(QColor& can_color),QColor& can_color
+{               //g - global f - funkcija
+
     if (c_pressed) //pressed
     {
-        if (ui->can0_onoff->text()=="ON") // on
+        if (can_onoff_p->text()=="ON") // on
         {
-            changecolor_C0(C0_color);
+            (this->*f)(can_color_g);
             if (ui->syncWithPress->isChecked())
             {
                 if (delay_ms!=0)
                 {
                             int podsesno_ms = delay_ms;
                             delay_ms = 99999;
-                            light_rgb(C0_color);
+                            light_rgb(can_color_g);
                             delay_ms = podsesno_ms;
                 }
 
             }
             else
             {
-                light_rgb(C0_color);
+                light_rgb(can_color_g);
             }
-            svirajNotuCB(ui->can0_changeNote);
+            changeRgbLabelColor(can_color_g);
+            svirajNotuCB(can_changeNote_p);
         }
     }
     else if (!c_pressed) //released
     {
-        changecolor_C0(to_darker_color(C0_color,3));
+        (this->*f)(to_darker_color(can_color_g,3));
         light_rgb(Qt::black);
+        changeRgbLabelColor(rgb_color);
     }
+}
+
+
+void Dialog::can_sharp_pressed(QComboBox* can_changeNote_p)
+{
+
+    int new_index = can_changeNote_p->currentIndex();
+    new_index++;
+    if (new_index > 11 ) new_index = 0;
+    can_changeNote_p->setCurrentIndex(new_index);
+
 }
 
 
 void Dialog::can0_sharp_pressed()
 {
-
+/*
     int new_index = ui->can0_changeNote->currentIndex();
     new_index++;
     if (new_index > 11 ) new_index = 0;
     ui->can0_changeNote->setCurrentIndex(new_index);
+*/
+    can_sharp_pressed(ui->can0_changeNote);
 
 }
 
+void Dialog::can1_sharp_pressed()
+{
+    can_sharp_pressed(ui->can1_changeNote);
+}
+
+void Dialog::can2_sharp_pressed()
+{
+    can_sharp_pressed(ui->can2_changeNote);
+}
+
+void Dialog::can3_sharp_pressed()
+{
+    can_sharp_pressed(ui->can3_changeNote);
+}
+
+void Dialog::can4_sharp_pressed()
+{
+    can_sharp_pressed(ui->can4_changeNote);
+}
+
+void Dialog::can5_sharp_pressed()
+{
+    can_sharp_pressed(ui->can5_changeNote);
+}
+
+void Dialog::can6_sharp_pressed()
+{
+    can_sharp_pressed(ui->can6_changeNote);
+}
+
+void Dialog::can_flat_pressed(QComboBox* can_changeNote_p)
+{
+    int new_index = can_changeNote_p->currentIndex();
+    new_index--;
+    if (new_index < 0 ) new_index = 11;
+    can_changeNote_p->setCurrentIndex(new_index);
+}
+
+
 void Dialog::can0_flat_pressed()
 {
+/*
     int new_index = ui->can0_changeNote->currentIndex();
     new_index--;
     if (new_index < 0 ) new_index = 11;
     ui->can0_changeNote->setCurrentIndex(new_index);
+*/
+    can_flat_pressed(ui->can0_changeNote);
+
 }
 
-void Dialog::to_major(bool checked)
+void Dialog::can1_flat_pressed()
+{
+    can_flat_pressed(ui->can1_changeNote);
+}
+
+void Dialog::can2_flat_pressed()
+{
+    can_flat_pressed(ui->can2_changeNote);
+}
+
+void Dialog::can3_flat_pressed()
+{
+    can_flat_pressed(ui->can3_changeNote);
+}
+
+void Dialog::can4_flat_pressed()
+{
+    can_flat_pressed(ui->can4_changeNote);
+}
+
+void Dialog::can5_flat_pressed()
+{
+    can_flat_pressed(ui->can5_changeNote);
+}
+
+void Dialog::can6_flat_pressed()
+{
+    can_flat_pressed(ui->can6_changeNote);
+}
+
+
+void Dialog::emitMajorMinor(bool checked)
 {
     if (checked)
     {
@@ -901,7 +1741,7 @@ void Dialog::to_major(bool checked)
     }
 }
 
-void Dialog::to_minor(bool checked)
+void Dialog::emitMinorMajor(bool checked)
 {
     if (checked)
     {
@@ -974,15 +1814,14 @@ void Dialog::radioButton_sharp_clicked(bool checked)
     if (checked)
     {
         sharp_or_flat = sharp;
-        choose_note(ui->can0_changeNote);
-        /*
-        choose_note(ui->comboBox_change_note_2);
-        choose_note(ui->comboBox_change_note_3);
-        choose_note(ui->comboBox_change_note_4);
-        choose_note(ui->comboBox_change_note_5);
-        choose_note(ui->comboBox_change_note_6);
-        choose_note(ui->comboBox_change_note_7);
-        */ //kad prekopiras sve dodaj
+        puniPadMeni(ui->can0_changeNote);
+        puniPadMeni(ui->can1_changeNote);
+        puniPadMeni(ui->can2_changeNote);
+        puniPadMeni(ui->can3_changeNote);
+        puniPadMeni(ui->can4_changeNote);
+        puniPadMeni(ui->can5_changeNote);
+        puniPadMeni(ui->can6_changeNote);
+
 
         if(ui->pushButton_major->isChecked())
             puni_p_meni_major();
@@ -999,15 +1838,13 @@ void Dialog::radioButton_flat_clicked(bool checked)
     if (checked)
     {
         this->sharp_or_flat = flat;
-        choose_note(ui->can0_changeNote);
-        /*
-        choose_note(ui->comboBox_change_note_2);
-        choose_note(ui->comboBox_change_note_3);
-        choose_note(ui->comboBox_change_note_4);
-        choose_note(ui->comboBox_change_note_5);
-        choose_note(ui->comboBox_change_note_6);
-        choose_note(ui->comboBox_change_note_7);
-        */
+        puniPadMeni(ui->can0_changeNote);
+        puniPadMeni(ui->can1_changeNote);
+        puniPadMeni(ui->can2_changeNote);
+        puniPadMeni(ui->can3_changeNote);
+        puniPadMeni(ui->can4_changeNote);
+        puniPadMeni(ui->can5_changeNote);
+        puniPadMeni(ui->can6_changeNote);
 
         if(ui->pushButton_major->isChecked())
             puni_p_meni_major();
@@ -1070,21 +1907,107 @@ void Dialog::output_on_off_stateChanged(int arg)
     }
 }
 
-void Dialog::C1SijaISvira()
-{}
 
-void Dialog::C2SijaISvira()
-{}
 
-void Dialog::C3SijaISvira()
-{}
+void Dialog::pokusajUpisatiOpet()
+{
+    esp32 -> open(QSerialPort::ReadWrite);
+    if ( (esp32->write(string_to_write)) != -1 )
+        emit upis_uspesan();
+}
 
-void Dialog::C4SijaISvira()
-{}
 
-void Dialog::C5SijaISvira()
-{}
+void Dialog::changeAllColors(const QString &text)
+{
+    if (text=="All Red")
+    {
+        C0_color = Qt::red;
+        C1_color = Qt::red;
+        C2_color = Qt::red;
+        C3_color = Qt::red;
+        C4_color = Qt::red;
+        C5_color = Qt::red;
+        C6_color = Qt::red;
+        changeAllAtOnce(to_darker_color(Qt::red,3));
+    }
+    else if (text=="All White")
+    {
+        C0_color = Qt::white;
+        C1_color = Qt::white;
+        C2_color = Qt::white;
+        C3_color = Qt::white;
+        C4_color = Qt::white;
+        C5_color = Qt::white;
+        C6_color = Qt::white;
+        changeAllAtOnce(to_darker_color(Qt::white,3));
+    }
+    else if (text=="Rainbow")
+    {
+        C0_color = QColor("#E81416"); //red
+        C1_color = QColor("#FFA500"); //orange
+        C2_color = QColor("#FAEB36"); //yellow
+        C3_color = QColor("#79C314"); //green
+        C4_color = QColor("#487DE7"); //blue
+        C5_color = QColor("#4B369D"); //indigo
+        C6_color = QColor("#70369D"); //violet
+        changecolor_C0(to_darker_color(C0_color,3));
+        changecolor_C1(to_darker_color(C1_color,3));
+        changecolor_C2(to_darker_color(C2_color,3));
+        changecolor_C3(to_darker_color(C3_color,3));
+        changecolor_C4(to_darker_color(C4_color,3));
+        changecolor_C5(to_darker_color(C5_color,3));
+        changecolor_C6(to_darker_color(C6_color,3));
+    }
+}
 
-void Dialog::C6SijaISvira()
-{}
+void Dialog::changeAllAtOnce(const QColor &c)
+{
+    changecolor_C0(c);
+    changecolor_C1(c);
+    changecolor_C2(c);
+    changecolor_C3(c);
+    changecolor_C4(c);
+    changecolor_C5(c);
+    changecolor_C6(c);
 
+}
+
+void Dialog::menjaj_skalu(const QString &arg1)
+{
+
+    for (int i=0; i<30;i++) // 30 skala postoji
+    {
+        QString text;
+
+        if (all_scales [i][0] == arg1)
+        {
+            text = all_scales [i][1];
+            ui->can0_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][2];
+            ui->can1_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][3];
+            ui->can2_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][4];
+            ui->can3_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][5];
+            ui->can4_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][6];
+            ui->can5_changeNote->setCurrentText(text);
+            text.clear();
+
+            text = all_scales [i][7];
+            ui->can6_changeNote->setCurrentText(text);
+            text.clear();
+        }
+    }
+}
