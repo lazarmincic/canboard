@@ -17,7 +17,7 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define SAMPLE_LOC "C:/Users/Lazar/Desktop/canboard_files/"
-
+#define NOTE_SPAN 900 //ms test mod
 
 #include <qdebug.h>
 #include <qstring.h>
@@ -47,6 +47,9 @@
 #include <QImage>
 #include <QSoundEffect>
 #include <QAudio>
+#include <QElapsedTimer>
+#include <QDeadlineTimer>
+#include <QDateTime>
 
 //qt verzija 5.15
 
@@ -246,6 +249,36 @@ private:
 
     void changeAllAtOnce(const QColor &c);
 
+    bool korisnik_unosi = 0;
+    bool rec_mode_on = 0;
+    bool play_mode_on = 0;
+
+    QElapsedTimer* e_timer ;
+    QVector<qint64> recorded_times; // svaki put kad se udje u dowhenpressedorreleased
+
+    QVector<bool> c_pressed_m; // m - memory
+    QVector<QPushButton*> can_onoff_m;
+    QVector<void_constqcolor> f_m;
+    QVector<QColor> can_color_m;
+    QVector<QComboBox*> can_changeNote_m;
+
+    int i_m;
+
+    QTimer *p_timer ; // p - play
+    QTimer *t_timer ; // t -test
+
+    QVector<int> tacan_odgovor;
+
+    void svirajNotuN(int can_number);
+
+
+    int CB_to_Number (QComboBox* c);
+
+    QVector<int> korisnik_odgovor;
+
+    QSoundEffect* efekat = new QSoundEffect;
+    QMessageBox* test_result;
+
 
 protected:
 
@@ -275,6 +308,7 @@ protected:
         {0,0,0,0,0,0,0},{0,0,0,0,1,1,1},{0,1,1,1,1,1,1},{0,0,0,0,0,1,1},{0,0,1,1,1,1,1},{0,1,1,1,1,1,1},{0,0,0,0,1,1,1},{0,0,0,0,0,0,1},{0,0,0,1,1,1,1},
         {0,0,0,0,0,0,1},{0,0,1,1,1,1,1},{0,0,0,0,0,1,1},{0,1,1,1,1,1,1},{0,0,0,0,1,1,1},{0,0,0,0,0,0,1}
     }; //ide istim redosledom kao i all_scales, pa ne mora biti char. ako je 0 - skala se ne menja, ako je 1, menja se za +1
+
 
 
 signals:
@@ -403,6 +437,13 @@ private slots:
     void pokusajUpisatiOpet();
     void changeAllColors(const QString &text);
     void menjaj_skalu(const QString &arg1);
+
+    void start_recording(bool pressed);
+    void start_playing(bool pressed);
+    void play_again();
+
+    void start_test(bool pressed);
+    void svirajNotuT();
 
 public slots:
 

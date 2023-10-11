@@ -236,11 +236,24 @@ Dialog::Dialog(QWidget *parent)
     connect(ui->input_on_off,&QCheckBox::stateChanged,this,&Dialog::input_on_off_stateChanged);
     connect(ui->output_on_off,&QCheckBox::stateChanged,this,&Dialog::output_on_off_stateChanged);
 
+    connect(ui->colorBox,&QComboBox::currentTextChanged,this,&Dialog::changeAllColors);
     ui->colorBox->insertItems(0,{"All Red","All White","Rainbow"});
-    ui->colorBox->setCurrentIndex(0); //def plava
+    ui->colorBox->setCurrentIndex(2); //def duga
 
-    connect(ui->colorBox,&QComboBox::textActivated,this,changeAllColors);
+    connect(ui->record,&QPushButton::toggled,this,&Dialog::start_recording);
+    e_timer = new QElapsedTimer;
 
+    connect(ui->play,&QPushButton::toggled,this,&Dialog::start_playing);
+    p_timer = new QTimer(this);
+    p_timer->setSingleShot(true);
+    connect(p_timer,&QTimer::timeout,this,&Dialog::play_again);
+
+    connect(ui->test,&QPushButton::toggled,this,&Dialog::start_test);
+    t_timer = new QTimer(this);
+    t_timer->setSingleShot(true);
+    connect(t_timer,&QTimer::timeout,this,&Dialog::svirajNotuT);
+
+    test_result = new QMessageBox (this);
 }
 
 Dialog::~Dialog()
@@ -267,6 +280,11 @@ Dialog::~Dialog()
     delete can4_zvuk;
     delete can5_zvuk;
     delete can6_zvuk;
+    delete e_timer;
+    delete p_timer;
+    delete t_timer;
+    delete efekat;
+    delete test_result;
 
     delete ui;
 }
@@ -1169,7 +1187,7 @@ void Dialog::errorCheckDelay(const QString& text, QLineEdit* x_delay_p, QLabel* 
 
 void Dialog::can_pressedOrReleased(bool* pressed,QVector<int> c_changed) //kao interapt
 {
-    //qDebug()<<c_changed;
+    //qDebug()<<"pressed:"<<pressed;
 
     //changecolor_C0(C0_color);
 
@@ -1581,7 +1599,55 @@ void Dialog::svirajNotuCB (QComboBox *can_changeNote_p) // cb - combobox jer je 
     //qDebug ()<<"Jacina note je"<<linearVolume;
     can_zvuk->play();
 
+    if (korisnik_unosi) //deo gde korisnik pritiska
+    {
+        korisnik_odgovor.append(CB_to_Number(can_changeNote_p));
+        if (korisnik_odgovor.size() >= ui->test_level->value())
+        {
+            // kraj
+           // qDebug()<<"k_o:"<<korisnik_odgovor;
+           // qDebug()<<"t_o:"<<tacan_odgovor;
+            korisnik_unosi = false;
 
+
+            QString string (SAMPLE_LOC);
+            QUrl url;
+            string.prepend("file:///");
+
+            if (korisnik_odgovor == tacan_odgovor) //tacno
+            {
+                string.append("correct.wav");
+                url = QUrl (string);
+                efekat->setSource(url);
+                efekat->play();
+               // QMessageBox::about(this,"Congrats!","That is the correct answer"); NE RADI!!
+                test_result->setWindowTitle("Congrats!");
+                test_result->setText("That is the correct answer");
+                test_result->show();
+
+            }
+            else // netacno
+            {
+                string.append("wrong.wav");
+                url = QUrl (string);
+                efekat->setSource(url);
+                efekat->play();
+                //QMessageBox::about(this,"Too bad!","Better luck next time!");
+                test_result->setWindowTitle("Too bad!");
+                test_result->setText("Better luck next time!");
+                test_result->show();
+            }
+            korisnik_odgovor.clear();
+            ui->test->setChecked(false);
+            return;
+
+
+        }
+        else
+        {
+        }
+
+    }
 
 }
 
@@ -1618,6 +1684,17 @@ void Dialog::doWhenPressedOrReleased(bool c_pressed, QPushButton* can_onoff_p, v
         (this->*f)(to_darker_color(can_color_g,3));
         light_rgb(Qt::black);
         changeRgbLabelColor(rgb_color);
+    }
+
+    if (rec_mode_on)
+    {
+        recorded_times.append(e_timer->restart());
+        //qDebug()<<recorded_times.last();
+        c_pressed_m.append(c_pressed);
+        can_onoff_m.append(can_onoff_p);
+        f_m.append(f);
+        can_color_m.append(can_color_g);
+        can_changeNote_m.append(can_changeNote_p);
     }
 }
 
@@ -2010,4 +2087,148 @@ void Dialog::menjaj_skalu(const QString &arg1)
             text.clear();
         }
     }
+}
+
+void Dialog::start_recording(bool pressed)
+{
+    if (pressed)
+    {
+        ui->play->setChecked(false);
+        ui->test->setChecked(false);
+
+        rec_mode_on = true;
+
+        play_mode_on = false;
+        // treba zapoceti brojanje ovde
+        e_timer->start();
+
+        recorded_times.clear();
+        c_pressed_m.clear();
+        can_onoff_m.clear();
+        f_m.clear();
+        can_color_m.clear();
+        can_changeNote_m.clear();
+    }
+    else
+    {
+        rec_mode_on = false;
+    }
+}
+
+void Dialog::start_playing(bool pressed)
+{
+    if (pressed)
+    {
+        ui->record->setChecked(false);
+        ui->test->setChecked(false);
+
+        play_mode_on = true;
+
+        rec_mode_on = false;
+
+
+        if (!recorded_times.isEmpty()) //nesto je snimljeno
+        {
+                i_m = 0;
+                p_timer->start(static_cast<int>(recorded_times[i_m]));
+        }
+    }
+    else
+    {
+        play_mode_on = false;
+    }
+
+}
+
+void Dialog::play_again()
+{
+    doWhenPressedOrReleased(c_pressed_m[i_m],can_onoff_m[i_m],f_m[i_m],can_color_m[i_m],can_changeNote_m[i_m]);
+    //qDebug()<<recorded_times[i_m];
+    i_m++;
+    if (i_m>=recorded_times.size())
+    {
+        i_m = 0;
+        return;
+    }
+    p_timer->start(int(recorded_times[i_m]));
+}
+
+void Dialog::start_test(bool pressed)
+{
+    if (pressed)
+    {
+
+        ui->record->setChecked(false);
+        ui->play->setChecked(false);
+
+
+        rec_mode_on = false;
+        play_mode_on = false;
+
+        tacan_odgovor.clear();
+        svirajNotuT();
+    }
+    else
+    {
+
+    }
+
+}
+
+void Dialog::svirajNotuN(int can_number)
+{
+    QComboBox* c = NULL;
+    switch (can_number)
+    {
+        case 0: c=ui->can0_changeNote;break;
+        case 1: c=ui->can1_changeNote;break;
+        case 2: c=ui->can2_changeNote;break;
+        case 3: c=ui->can3_changeNote;break;
+        case 4: c=ui->can4_changeNote;break;
+        case 5: c=ui->can5_changeNote;break;
+        case 6: c=ui->can6_changeNote;break;
+        default: break;
+
+    }
+    svirajNotuCB(c);
+}
+
+void Dialog::svirajNotuT()
+{
+    int level = ui->test_level->value();
+    if (tacan_odgovor.size()>=level )
+    {
+
+        QString s;
+        s.append("Play the ");
+        s.append(QString::number(level));
+        s.append(" note");
+        if (level>1) s.append("s");
+        s.append(" you just heard.");
+        QMessageBox::information(this,"Test Mode",s);
+        korisnik_unosi = true;
+        korisnik_odgovor.clear();
+        return;
+    }
+    else
+    {
+        tacan_odgovor.append(QRandomGenerator::global()->bounded(0,7)); //sa 0 bez 7
+        svirajNotuN(tacan_odgovor.last()); // n-number
+        write_diode(plava,delay_ms,jacina_blue);
+        t_timer->start(NOTE_SPAN);
+    }
+
+}
+
+int Dialog::CB_to_Number (QComboBox* c)
+{
+    int ret;
+         if (c==ui->can0_changeNote) ret = 0;
+    else if (c==ui->can1_changeNote) ret = 1;
+    else if (c==ui->can2_changeNote) ret = 2;
+    else if (c==ui->can3_changeNote) ret = 3;
+    else if (c==ui->can4_changeNote) ret = 4;
+    else if (c==ui->can5_changeNote) ret = 5;
+    else if (c==ui->can6_changeNote) ret = 6;
+    return ret;
 }
