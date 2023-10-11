@@ -51,6 +51,7 @@
 #include <QDeadlineTimer>
 #include <QDateTime>
 
+
 //qt verzija 5.15
 
 enum led_enum {gasi,zelena = 1,crvena = 2,plava = 3,rgb_R =4,rgb_G=5,rgb_B=6,rgb};

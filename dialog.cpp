@@ -386,6 +386,7 @@ void Dialog::write_diode(led_enum l, int delay_ms, int jacina)
         connect(this,&Dialog::upis_uspesan,prozor_greske,&QMessageBox::accept);
         connect(this,&Dialog::upis_uspesan,timer_temp,&QTimer::deleteLater);
         connect(this,&Dialog::upis_uspesan,prozor_greske,&QMessageBox::deleteLater);
+        write_diode(crvena,delay_ms,jacina_red);
         timer_temp->start(CHECKING_RATE);
         prozor_greske->exec();
         }
@@ -910,6 +911,8 @@ void Dialog::x_jacina_change(int x_jacina_novo,int* jacina_x_g,led_enum boja,QLa
 
 }
 
+
+
 void Dialog::red_jacina_change(int red_jacina_novo)
 {
 /*
@@ -1018,6 +1021,7 @@ void Dialog::checkifdisconnected() // ponavlja se u reg. intervalima
                 esp32 -> setFlowControl(QSerialPort::NoFlowControl);
                 esp32 -> setParity(QSerialPort::OddParity); //
                 esp32 -> setStopBits(QSerialPort::TwoStop); //
+                write_diode(zelena,delay_ms,jacina_green);
                 QObject::connect(esp32, &QSerialPort::readyRead,this,&Dialog::readSerial);
         }
         else if (esp32_prikacen==0) //iz prikacenog u neprikaceno
@@ -1029,6 +1033,7 @@ void Dialog::checkifdisconnected() // ponavlja se u reg. intervalima
             //msbx.setWindowFlags(windowFlags() |Qt::WindowStaysOnTopHint);
             connect(this,&Dialog::esp32_connected_signal,msbx,&QMessageBox::accept);
             connect(this,&Dialog::esp32_connected_signal,msbx,&QMessageBox::deleteLater);
+            write_diode(crvena,delay_ms,jacina_red);
             msbx->show();
         }
 
@@ -1620,6 +1625,7 @@ void Dialog::svirajNotuCB (QComboBox *can_changeNote_p) // cb - combobox jer je 
                 url = QUrl (string);
                 efekat->setSource(url);
                 efekat->play();
+                write_diode(zelena,delay_ms,jacina_green);
                // QMessageBox::about(this,"Congrats!","That is the correct answer"); NE RADI!!
                 test_result->setWindowTitle("Congrats!");
                 test_result->setText("That is the correct answer");
@@ -1632,6 +1638,7 @@ void Dialog::svirajNotuCB (QComboBox *can_changeNote_p) // cb - combobox jer je 
                 url = QUrl (string);
                 efekat->setSource(url);
                 efekat->play();
+                write_diode(crvena,delay_ms,jacina_red);
                 //QMessageBox::about(this,"Too bad!","Better luck next time!");
                 test_result->setWindowTitle("Too bad!");
                 test_result->setText("Better luck next time!");
@@ -1684,6 +1691,7 @@ void Dialog::doWhenPressedOrReleased(bool c_pressed, QPushButton* can_onoff_p, v
         (this->*f)(to_darker_color(can_color_g,3));
         light_rgb(Qt::black);
         changeRgbLabelColor(rgb_color);
+
     }
 
     if (rec_mode_on)
@@ -2148,6 +2156,7 @@ void Dialog::play_again()
     if (i_m>=recorded_times.size())
     {
         i_m = 0;
+        ui->play->setChecked(false);
         return;
     }
     p_timer->start(int(recorded_times[i_m]));
@@ -2170,7 +2179,10 @@ void Dialog::start_test(bool pressed)
     }
     else
     {
-
+        t_timer->stop();
+        tacan_odgovor.clear();
+        korisnik_unosi = false;
+        korisnik_odgovor.clear();
     }
 
 }
@@ -2205,6 +2217,7 @@ void Dialog::svirajNotuT()
         s.append(" note");
         if (level>1) s.append("s");
         s.append(" you just heard.");
+
         QMessageBox::information(this,"Test Mode",s);
         korisnik_unosi = true;
         korisnik_odgovor.clear();
