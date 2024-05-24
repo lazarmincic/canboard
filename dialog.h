@@ -50,6 +50,7 @@
 #include <QElapsedTimer>
 #include <QDeadlineTimer>
 #include <QDateTime>
+#include <QAbstractButton>
 
 
 //qt verzija 5.15

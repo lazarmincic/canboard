@@ -1031,10 +1031,17 @@ void Dialog::checkifdisconnected() // ponavlja se u reg. intervalima
             msbx->setStandardButtons(QMessageBox::NoButton);
             msbx->setInformativeText("Waiting for the connection...");
             //msbx.setWindowFlags(windowFlags() |Qt::WindowStaysOnTopHint);
+            QPushButton* exit_dugme = new QPushButton("I can't wait",this); //izlazi iz programa
+            connect(exit_dugme,&QPushButton::clicked,this,&Dialog::deleteLater);
+            msbx->addButton(exit_dugme,QMessageBox::DestructiveRole);
             connect(this,&Dialog::esp32_connected_signal,msbx,&QMessageBox::accept);
-            connect(this,&Dialog::esp32_connected_signal,msbx,&QMessageBox::deleteLater);
-            write_diode(crvena,delay_ms,jacina_red);
+
+
+            //write_diode(crvena,delay_ms,jacina_red); ne može da upiše u diodu ako nije povezan sa pločom
+          //  qDebug() << "Debug.\n";
             msbx->show();
+            connect(this,&Dialog::esp32_connected_signal,msbx,&QMessageBox::deleteLater);
+            connect(this,&Dialog::esp32_connected_signal,exit_dugme,&QPushButton::deleteLater);
         }
 
     }
