@@ -1676,12 +1676,12 @@ void Dialog::doWhenPressedOrReleased(bool c_pressed, QPushButton* can_onoff_p, v
             (this->*f)(can_color_g);
             if (ui->syncWithPress->isChecked())
             {
-                if (delay_ms!=0)
+                if (rgb_delay_ms!=0) // prethodno delay_ms
                 {
-                            int podsesno_ms = delay_ms;
-                            delay_ms = 99999;
+                            int podsesno_ms = rgb_delay_ms;
+                            rgb_delay_ms = 99999;
                             light_rgb(can_color_g);
-                            delay_ms = podsesno_ms;
+                            rgb_delay_ms = podsesno_ms;
                 }
 
             }
@@ -1984,17 +1984,17 @@ void Dialog::output_on_off_stateChanged(int arg)
 {
     if (arg == Qt::Checked)
     {
-        ui->pushButton_red->setText("ON");
-        ui->pushButton_green->setText("ON");
-        ui->pushButton_blue->setText("ON");
-        ui->pushButton_rgb->setText("ON");
+        ui->pushButton_red->click(); // pre: setText("OFF")
+        ui->pushButton_green->click();
+        ui->pushButton_blue->click();
+        ui->pushButton_rgb->click();
     }
     else if (arg == Qt::Unchecked)
     {
-        ui->pushButton_red->setText("OFF");
-        ui->pushButton_green->setText("OFF");
-        ui->pushButton_blue->setText("OFF");
-        ui->pushButton_rgb->setText("OFF");
+        ui->pushButton_red->click();
+        ui->pushButton_green->click();
+        ui->pushButton_blue->click();
+        ui->pushButton_rgb->click();
 
     }
 }
