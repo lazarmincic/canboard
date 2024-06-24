@@ -3,7 +3,7 @@ Lazar's canboard source code.
 Only tested on Windows (11).
 Steps in order to make it work on a diferent machine(s):
 
--for ESP32
+- for ESP32
 1. download arduino ide and necessary board files
 2. open esp32_file.ino and flash to board
 
