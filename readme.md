@@ -10,7 +10,7 @@ Steps in order to make it work on a diferent machine(s):
 - for qt:
 1. clone this repository
 2. create new project in qt, and add all the files exept the pro.user file
-3. insert data folder (Canboard ?.?.?/bin from the download link) in the debug/release dir. that qt makes when compiling the program
+3. insert data folder (Canboard ?.?.?/bin/data from the download link) in the debug/release dir. that qt makes when compiling the program
 
 OR
 
