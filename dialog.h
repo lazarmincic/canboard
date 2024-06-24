@@ -10,13 +10,19 @@
 #define default_can Qt::black
 #define pot_margin 3
 #define timer_ms 250
-#define CANRED_IMG "C:/Users/Lazar/Desktop/can_red.png"
-#define REDDIODE_IMG "C:/Users/Lazar/Desktop/all_red_diode.png"
+
+#define CANRED_IMG (QCoreApplication::applicationDirPath().append("/data/can_red.png"))
+#define REDDIODE_IMG (QCoreApplication::applicationDirPath().append("/data/all_red_diode.png"))
+#define SAMPLE_LOC (QCoreApplication::applicationDirPath().append("/data/canboard_files/"))
+
+//#define CANRED_IMG "C:/Users/Lazar/Desktop/can_red.png"
+//#define REDDIODE_IMG "C:/Users/Lazar/Desktop/all_red_diode.png"
+//#define SAMPLE_LOC "C:/Users/Lazar/Desktop/canboard_files/"
+
 #define CHECKING_RATE 400 //ms
 #define MAX_DELAY_LENGTH 4
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define SAMPLE_LOC "C:/Users/Lazar/Desktop/canboard_files/"
 #define NOTE_SPAN 900 //ms test mod
 
 #include <qdebug.h>
@@ -446,6 +452,7 @@ private slots:
 
     void start_test(bool pressed);
     void svirajNotuT();
+
 
 public slots:
 

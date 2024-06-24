@@ -57,6 +57,7 @@ Dialog::Dialog(QWidget *parent)
 
     connect(ui->lineEdit_delay,&QLineEdit::textEdited,this,&Dialog::delay_updated);
 
+    ui->label_red->setPixmap(changeImageColor(REDDIODE_IMG,Qt::red));
     ui->label_green->setPixmap(changeImageColor(REDDIODE_IMG,Qt::green));
     ui->label_blue->setPixmap(changeImageColor(REDDIODE_IMG,Qt::blue));
     ui->label_rgb->setPixmap(changeImageColor(REDDIODE_IMG,default_rgb));
@@ -1021,8 +1022,9 @@ void Dialog::checkifdisconnected() // ponavlja se u reg. intervalima
                 esp32 -> setFlowControl(QSerialPort::NoFlowControl);
                 esp32 -> setParity(QSerialPort::OddParity); //
                 esp32 -> setStopBits(QSerialPort::TwoStop); //
-                write_diode(zelena,delay_ms,jacina_green);
+
                 QObject::connect(esp32, &QSerialPort::readyRead,this,&Dialog::readSerial);
+                write_diode(zelena,delay_ms,jacina_green);
         }
         else if (esp32_prikacen==0) //iz prikacenog u neprikaceno
         {
@@ -2252,3 +2254,4 @@ int Dialog::CB_to_Number (QComboBox* c)
     else if (c==ui->can6_changeNote) ret = 6;
     return ret;
 }
+
