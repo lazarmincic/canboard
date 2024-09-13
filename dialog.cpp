@@ -10,6 +10,7 @@ Dialog::Dialog(QWidget *parent)
 
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint); //minimize button
     setWindowState(Qt::WindowActive); //pokreni maksimizovanog
+    setWindowIcon(QIcon(CANRED_IMG));
 
     //esp32_id_print(); //debug
 
@@ -1605,17 +1606,17 @@ void Dialog::svirajNotuCB (QComboBox *can_changeNote_p) // cb - combobox jer je 
     can_zvuk->setSource(url_sampla);
 
     int volumeSliderValue = ui->volume_slider->value();
-    qreal linearVolume /* = QAudio::convertVolume(volumeSliderValue / qreal(100.0),
+    qreal linearVolume  = QAudio::convertVolume(volumeSliderValue / qreal(100.0),
                                                QAudio::LogarithmicVolumeScale,
-                                               QAudio::LinearVolumeScale)*/;
-    linearVolume = volumeSliderValue / qreal(100.0);
+                                               QAudio::LinearVolumeScale);
+   // linearVolume = volumeSliderValue / qreal(100.0);
     can_zvuk->setVolume(linearVolume);
     //qDebug ()<<"Jacina note je"<<linearVolume;
     can_zvuk->play();
 
     if (korisnik_unosi) //deo gde korisnik pritiska
     {
-        korisnik_odgovor.append(CB_to_Number(can_changeNote_p));
+        korisnik_odgovor.append(can_changeNote_p->currentText());
         if (korisnik_odgovor.size() >= ui->test_level->value())
         {
             // kraj
@@ -2234,24 +2235,27 @@ void Dialog::svirajNotuT()
     }
     else
     {
-        tacan_odgovor.append(QRandomGenerator::global()->bounded(0,7)); //sa 0 bez 7
-        svirajNotuN(tacan_odgovor.last()); // n-number
+        int i_temp = QRandomGenerator::global()->bounded(0,7);  //sa 0 bez 7
+        tacan_odgovor.append(num_to_CB(i_temp)->currentText());
+        svirajNotuN(i_temp); // n-number
         write_diode(plava,delay_ms,jacina_blue);
         t_timer->start(NOTE_SPAN);
     }
 
 }
 
-int Dialog::CB_to_Number (QComboBox* c)
-{
-    int ret;
-         if (c==ui->can0_changeNote) ret = 0;
-    else if (c==ui->can1_changeNote) ret = 1;
-    else if (c==ui->can2_changeNote) ret = 2;
-    else if (c==ui->can3_changeNote) ret = 3;
-    else if (c==ui->can4_changeNote) ret = 4;
-    else if (c==ui->can5_changeNote) ret = 5;
-    else if (c==ui->can6_changeNote) ret = 6;
-    return ret;
-}
 
+QComboBox* Dialog::num_to_CB(int i_limenke)
+{
+    switch(i_limenke)
+    {
+    case 0: return ui->can0_changeNote ;
+    case 1: return ui->can1_changeNote ;
+    case 2: return ui->can2_changeNote ;
+    case 3: return ui->can3_changeNote ;
+    case 4: return ui->can4_changeNote ;
+    case 5: return ui->can5_changeNote ;
+    case 6: return ui->can6_changeNote ;
+    default: return NULL;
+    }
+}

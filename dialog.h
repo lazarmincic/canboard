@@ -57,6 +57,7 @@
 #include <QDeadlineTimer>
 #include <QDateTime>
 #include <QAbstractButton>
+#include <QIcon>
 
 
 //qt verzija 5.15
@@ -275,14 +276,13 @@ private:
     QTimer *p_timer ; // p - play
     QTimer *t_timer ; // t -test
 
-    QVector<int> tacan_odgovor;
+    QStringList tacan_odgovor;
 
     void svirajNotuN(int can_number);
 
+    QComboBox* num_to_CB(int i_limenke);
 
-    int CB_to_Number (QComboBox* c);
-
-    QVector<int> korisnik_odgovor;
+    QStringList korisnik_odgovor;
 
     QSoundEffect* efekat = new QSoundEffect;
     QMessageBox* test_result;
